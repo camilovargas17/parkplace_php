@@ -1,0 +1,106 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo */
+body {
+    background: #eef2f7;
+    min-height: 100vh;
+    padding: 2rem;
+    color: #333;
+}
+
+/* Título */
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+    font-size: 2rem;
+}
+
+/* Tabla */
+table {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezados */
+table th {
+    background: #34495e;
+    color: #fff;
+    text-align: left;
+    padding: 1rem;
+    font-size: 1rem;
+}
+
+/* Filas */
+table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+/* Inputs dentro de tabla */
+input[type="number"] {
+    width: 120px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="number"]:focus {
+    border-color: #4facfe;
+    box-shadow: 0 0 6px rgba(79, 172, 254, 0.3);
+}
+
+/* Botón */
+button {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+/* Filas alternas */
+table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Hover */
+table tr:hover {
+    background: #f1f9ff;
+    transition: 0.2s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
