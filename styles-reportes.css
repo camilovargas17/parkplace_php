@@ -1,0 +1,83 @@
+/* === Estilos generales para registros === */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+h1, h2 {
+  margin: 0 0 10px 0;
+}
+
+.registros-container {
+  padding: 20px;
+}
+
+/* === Tarjetas de secciones === */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* === Tablas de registros === */
+.tabla-registros {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.tabla-registros th,
+.tabla-registros td {
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.tabla-registros thead {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+}
+
+.tabla-registros tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tabla-registros tr:hover {
+  background-color: #eef4ff;
+}
+
+/* === Botones === */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.btn-entrada {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-entrada:hover {
+  background: #15803d;
+}
+
+.btn-salida {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-salida:hover {
+  background: #b91c1c;
+}

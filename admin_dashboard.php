@@ -11,7 +11,6 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
   <title>Panel Administrador - ParkPlace</title>
   <link rel="stylesheet" href="styles_admin.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
 </head>
 <body>
   <div class="dashboard">
@@ -24,14 +23,15 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
       <ul class="menu">
         <li><a href="admin_dashboard.php" class="active">🏠 Panel Principal</a></li>
         <li><a href="usuarios.php">👤 Usuarios</a></li>
-        <li><a href="registros.php">📋 Registros</a></li>
+        <li> <a href="registro_entrada.php">Registrar Entrada</a></li>
+        <li><a href="registro_salida.php">Registrar Salida</a></li>
         <li><a href="vehiculos.php">🚗 Vehículos</a></li>
         <li><a href="tarifas.php">💲 Tarifas</a></li>
         <li><a href="reportes.php">📊 Reportes</a></li>
       </ul>
       <div class="sidebar-footer">
         <p><b>Rol actual:</b> Administrador</p>
-        <a href="logout.php" class="logout">🚪 Cerrar sesión</a>
+        <a href="index.php" class="logout">🚪 Cerrar sesión</a>
       </div>
     </aside>
 

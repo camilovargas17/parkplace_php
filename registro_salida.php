@@ -1,7 +1,7 @@
 <?php
 session_start();
 require 'db.php';
-if ($_SESSION['rol']!=='operador') { header("Location:index.php"); exit; }
+if ($_SESSION['rol']!=='operador'|| $_SESSION['rol']!=='administrador') { header("Location:index.php"); exit; }
 
 if ($_SERVER['REQUEST_METHOD']==='POST') {
   $placa=$_POST['placa'];
