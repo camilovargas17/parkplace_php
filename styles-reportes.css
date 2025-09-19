@@ -1,83 +1,81 @@
-/* === Estilos generales para registros === */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   background: #f4f6f9;
   margin: 0;
-  padding: 0;
   color: #333;
 }
 
-h1, h2 {
-  margin: 0 0 10px 0;
+.dashboard {
+  display: flex;
+  min-height: 100vh;
 }
 
-.registros-container {
+.sidebar {
+  width: 220px;
+  background: #1e293b;
+  color: white;
   padding: 20px;
 }
 
-/* === Tarjetas de secciones === */
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.sidebar a.active,
+.sidebar a:hover {
+  background: #2563eb;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 15px;
+}
+
 .card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* === Tablas de registros === */
-.tabla-registros {
+.number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.green { color: #16a34a; }
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.tabla-reportes {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  font-size: 14px;
 }
 
-.tabla-registros th,
-.tabla-registros td {
-  padding: 12px 10px;
+.tabla-reportes th, .tabla-reportes td {
   border: 1px solid #ddd;
+  padding: 10px;
   text-align: center;
 }
 
-.tabla-registros thead {
-  background-color: #2563eb;
+.tabla-reportes thead {
+  background: #2563eb;
   color: white;
-  font-weight: bold;
-}
-
-.tabla-registros tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.tabla-registros tr:hover {
-  background-color: #eef4ff;
-}
-
-/* === Botones === */
-.btn {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  text-decoration: none;
-  transition: background 0.3s ease;
-}
-
-.btn-entrada {
-  background: #16a34a;
-  color: white;
-}
-
-.btn-entrada:hover {
-  background: #15803d;
-}
-
-.btn-salida {
-  background: #dc2626;
-  color: white;
-}
-
-.btn-salida:hover {
-  background: #b91c1c;
 }
