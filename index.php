@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email=? AND password=? LIMIT 1");
     $stmt->execute([$email, $pass]);
     $u = $stmt->fetch(PDO::FETCH_ASSOC);
+    var_dump($u);
 
     if ($u) {
         $_SESSION['id'] = $u['id'];
@@ -28,12 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!doctype html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8">
-<title>ParkPlace - Login</title>
-<link rel="stylesheet" href="styles.css">
-<script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <title>ParkPlace - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-box">
@@ -43,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2>Bienvenido a <span>ParkPlace</span></h2>
             <p class="subtitle">Sistema integral de gestión de parqueadero</p>
 
-            <?php if(!empty($error)) echo "<p class='error'>$error</p>"; ?>
+            <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
 
             <form method="POST">
                 <div class="input-group">
@@ -68,20 +71,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-<script>
-function togglePassword() {
-    const input = document.getElementById("password");
-    const icon = document.querySelector(".toggle-password");
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-    } else {
-        input.type = "password";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-    }
-}
-</script>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.querySelector(".toggle-password");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
 </body>
+
 </html>

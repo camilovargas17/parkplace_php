@@ -1,0 +1,71 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo */
+body {
+    background: #f4f6f9;
+    min-height: 100vh;
+    padding: 2rem;
+    color: #333;
+}
+
+/* Título */
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #222;
+    font-size: 2rem;
+}
+
+/* Tabla */
+table {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezados */
+table th {
+    background: #4facfe;
+    color: #fff;
+    text-align: left;
+    padding: 1rem;
+    font-size: 1rem;
+}
+
+/* Filas */
+table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+/* Filas alternas */
+table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+/* Hover */
+table tr:hover {
+    background: #eef7ff;
+    transition: 0.2s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
