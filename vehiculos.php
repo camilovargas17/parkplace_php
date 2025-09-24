@@ -1,11 +1,17 @@
 <?php
 session_start();
 require 'db.php';
+
+// Verificar rol
 if ($_SESSION['rol'] !== 'administrador') {
   header("Location:index.php");
   exit;
 }
 
+// Dashboard destino según rol
+$dashboard = ($_SESSION['rol'] === 'administrador') ? 'admin_dashboard.php' : 'operador_dashboard.php';
+
+// Obtener vehículos
 $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fetchAll();
 ?>
 <!doctype html>
@@ -86,6 +92,24 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
     .acciones .delete:hover {
       color: #d63031;
     }
+
+    /* Botón volver */
+    .volver {
+      margin-top: 1.5rem;
+      display: inline-block;
+      padding: 0.8rem 1.2rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #36d1dc, #5b86e5);
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .volver:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(91, 134, 229, 0.6);
+    }
   </style>
 </head>
 
@@ -117,6 +141,8 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
       </tr>
     <?php endforeach; ?>
   </table>
-</body>
 
+  <!-- Botón volver dinámico -->
+  <a href="<?php echo $dashboard; ?>" class="volver">⬅️ Volver al Dashboard</a>
+</body>
 </html>

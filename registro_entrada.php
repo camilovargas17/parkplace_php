@@ -14,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $tipo  = $_POST['tipo'];
 
   // Insertar o actualizar vehículo
-  $stmt = $pdo->prepare("INSERT INTO vehiculos (placa,tipo) VALUES (?,?) ON DUPLICATE KEY UPDATE tipo=VALUES(tipo)");
+  $stmt = $pdo->prepare("INSERT INTO vehiculos (placa,tipo) VALUES (?,?) 
+                         ON DUPLICATE KEY UPDATE tipo=VALUES(tipo)");
   $stmt->execute([$placa, $tipo]);
 
   $vehiculo_id = $pdo->lastInsertId();
@@ -22,24 +23,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vehiculo_id = $pdo->query("SELECT id FROM vehiculos WHERE placa = " . $pdo->quote($placa))->fetchColumn();
   }
 
-  // Buscar un espacio libre
-  $stmt = $pdo->query("SELECT id FROM espacios WHERE ocupado = 0 LIMIT 1");
-  $espacio_id = $stmt->fetchColumn();
+  // 🚨 VALIDAR SI EL VEHÍCULO YA ESTÁ DENTRO
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM registros 
+                         WHERE vehiculo_id = ? AND hora_salida IS NULL");
+  $stmt->execute([$vehiculo_id]);
+  $yaDentro = $stmt->fetchColumn();
 
-  if ($espacio_id) {
-    // Asignar el espacio al vehículo
-    $stmt = $pdo->prepare("UPDATE espacios SET ocupado=1, vehiculo_id=? WHERE id=?");
-    $stmt->execute([$vehiculo_id, $espacio_id]);
-
-    // Registrar entrada
-    $stmt = $pdo->prepare("INSERT INTO registros (vehiculo_id, usuario_id, hora_entrada, espacio_id) VALUES (?, ?, NOW(), ?)");
-    $stmt->execute([$vehiculo_id, $_SESSION['id'], $espacio_id]);
-
-    $msg = "✅ Vehículo registrado en el espacio #$espacio_id.";
+  if ($yaDentro > 0) {
+    $msg = "⚠️ El vehículo con placa $placa ya se encuentra dentro del estacionamiento.";
   } else {
-    $msg = "⚠️ No hay espacios disponibles.";
+    // Buscar un espacio libre
+    $stmt = $pdo->query("SELECT id FROM espacios WHERE ocupado = 0 LIMIT 1");
+    $espacio_id = $stmt->fetchColumn();
+
+    if ($espacio_id) {
+      // Asignar el espacio al vehículo
+      $stmt = $pdo->prepare("UPDATE espacios SET ocupado=1, vehiculo_id=? WHERE id=?");
+      $stmt->execute([$vehiculo_id, $espacio_id]);
+
+      // Registrar entrada
+      $stmt = $pdo->prepare("INSERT INTO registros (vehiculo_id, usuario_id, hora_entrada, espacio_id) 
+                             VALUES (?, ?, NOW(), ?)");
+      $stmt->execute([$vehiculo_id, $_SESSION['id'], $espacio_id]);
+
+      $msg = "✅ Vehículo registrado en el espacio #$espacio_id.";
+    } else {
+      $msg = "⚠️ No hay espacios disponibles.";
+    }
   }
 }
+
 ?>
 <!doctype html>
 <html lang="es">
@@ -124,6 +137,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6);
     }
 
+    /* Botón secundario */
+    .btn-back {
+      margin-top: 1rem;
+      display: inline-block;
+      padding: 0.9rem;
+      border-radius: 12px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn-back:hover {
+      background: rgba(255,255,255,0.35);
+      box-shadow: 0 6px 15px rgba(255,255,255,0.3);
+    }
+
     .flash {
       background: rgba(0, 255, 163, 0.2);
       border: 1px solid #00f2fe;
@@ -159,6 +190,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </select>
       <button type="submit">Registrar</button>
     </form>
+
+    <!-- Botón Volver -->
+    <a href="<?php echo ($_SESSION['rol'] == 'administrador') ? 'admin_dashboard.php' : 'operador_dashboard.php'; ?>" class="btn-back">
+      ⬅️ Volver al Dashboard
+    </a>
   </div>
 </body>
 </html>
