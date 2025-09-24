@@ -36,6 +36,23 @@ $tarifas = $pdo->query("SELECT * FROM tarifas ORDER BY tipo_vehiculo")->fetchAll
     button { padding: 6px 12px; background: #16a34a; border: none; color: white; cursor: pointer; border-radius: 5px; }
     button:hover { background: #15803d; }
     h1 { text-align: center; color: #1e3a8a; }
+
+    .volver {
+      display: block;
+      margin: 20px auto;
+      text-align: center;
+    }
+    .volver a {
+      display: inline-block;
+      padding: 8px 15px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+    .volver a:hover {
+      background: #1e40af;
+    }
   </style>
 </head>
 <body>
@@ -63,5 +80,10 @@ $tarifas = $pdo->query("SELECT * FROM tarifas ORDER BY tipo_vehiculo")->fetchAll
       </tr>
     <?php endforeach; ?>
   </table>
+
+  <!-- 🔙 Botón Volver -->
+  <div class="volver">
+    <a href="admin_dashboard.php">⬅️ Volver al Panel</a>
+  </div>
 </body>
 </html>
