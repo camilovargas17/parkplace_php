@@ -5,8 +5,11 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
   exit;
 }
 
-// Conexión a la BD centralizada
-require_once "db.php";
+// Conexión a la BD
+$mysqli = new mysqli("localhost", "root", "", "parkplace");
+if ($mysqli->connect_errno) {
+  die("Error de conexión: " . $mysqli->connect_error);
+}
 
 // Vehículos activos (entraron y aún no tienen salida)
 $resActivos = $mysqli->query("SELECT COUNT(*) AS activos FROM registros WHERE hora_salida IS NULL");
@@ -47,12 +50,13 @@ for ($i = 0; $i < 7; $i++) {
       <ul class="menu">
         <li><a href="admin_dashboard.php" class="active">🏠 Panel Principal</a></li>
         <li><a href="usuarios.php">👤 Usuarios</a></li>
-        <li><a href="registro_entrada.php">⬅Registrar Entrada</a></li>
-        <li><a href="registro_salida.php">➡Registrar Salida</a></li>
+        <li><a href="registro_entrada.php">⬅️Registrar Entrada</a></li>
+        <li><a href="registro_salida.php">➡️Registrar Salida</a></li>
         <li><a href="vehiculos.php">🚗 Vehículos</a></li>
         <li><a href="tarifas.php">💲 Tarifas</a></li>
         <li><a href="reportes.php">📊 Reportes</a></li>
-        <li><a href="espacios.php">🅿 Espacios</a></li>
+        <!-- ✅ Nuevo enlace a ESPACIOS -->
+        <li><a href="espacios.php">🅿️ Espacios</a></li>
       </ul>
       <div class="sidebar-footer">
         <p><b>Rol actual:</b> Administrador</p>
