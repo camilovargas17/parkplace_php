@@ -1,9 +1,55 @@
 <?php
 session_start();
+require 'db.php';
+
+// 🔒 Verificar acceso
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
   header("Location:index.php");
   exit;
 }
+
+// ==================== 📊 CONSULTAS ====================
+
+// Ingresos de hoy
+$stmt = $pdo->prepare("SELECT COALESCE(SUM(costo),0) FROM registros WHERE DATE(hora_salida) = CURDATE()");
+$stmt->execute();
+$ingresosHoy = $stmt->fetchColumn();
+
+// Vehículos de hoy
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM registros WHERE DATE(hora_entrada) = CURDATE()");
+$stmt->execute();
+$vehiculosHoy = $stmt->fetchColumn();
+
+// Promedio semanal (ingresos/día)
+$stmt = $pdo->prepare("SELECT COALESCE(SUM(costo),0)/7 FROM registros WHERE YEARWEEK(hora_entrada,1) = YEARWEEK(CURDATE(),1)");
+$stmt->execute();
+$promedioSemanal = $stmt->fetchColumn();
+
+// Ocupación actual
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM registros WHERE hora_salida IS NULL");
+$stmt->execute();
+$ocupacionActual = $stmt->fetchColumn();
+$capacidad = 50; // ⚡ Ajusta según tu parqueadero
+
+// Actividad por hora (hoy)
+$stmt = $pdo->prepare("SELECT HOUR(hora_entrada) as hora, COUNT(*) as total FROM registros WHERE DATE(hora_entrada) = CURDATE() GROUP BY HOUR(hora_entrada)");
+$stmt->execute();
+$actividadHoras = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Ingresos semanales
+$stmt = $pdo->prepare("SELECT DAYNAME(hora_salida) as dia, SUM(costo) as total FROM registros WHERE YEARWEEK(hora_salida,1) = YEARWEEK(CURDATE(),1) GROUP BY DAYOFWEEK(hora_salida) ORDER BY DAYOFWEEK(hora_salida)");
+$stmt->execute();
+$ingresosSemanales = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Distribución por tipo de vehículo
+$stmt = $pdo->prepare("SELECT v.tipo, COUNT(*) as total FROM registros r INNER JOIN vehiculos v ON v.id = r.vehiculo_id WHERE DATE(r.hora_entrada) = CURDATE() GROUP BY v.tipo");
+$stmt->execute();
+$tiposVehiculos = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// Clientes frecuentes
+$stmt = $pdo->prepare("SELECT v.placa, COUNT(r.id) as visitas, MAX(r.hora_entrada) as ultima, SUM(r.costo) as gastado FROM registros r INNER JOIN vehiculos v ON v.id = r.vehiculo_id GROUP BY v.placa ORDER BY visitas DESC LIMIT 5");
+$stmt->execute();
+$clientesFrecuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="es">
@@ -24,9 +70,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
       margin-left: 15px;
       transition: background 0.3s;
     }
-    .btn-exportar:hover {
-      background: #b91c1c;
-    }
+    .btn-exportar:hover { background: #b91c1c; }
   </style>
 </head>
 <body>
@@ -40,13 +84,15 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
       <ul class="menu">
         <li><a href="admin_dashboard.php">🏠 Panel Principal</a></li>
         <li><a href="usuarios.php">👤 Usuarios</a></li>
-        <li><a href="registros.php">📋 Registros</a></li>
+        <li><a href="registro_entrada.php">Registrar Entrada</a></li>
+        <li><a href="registro_salida.php">Registrar Salida</a></li>
+        <li><a href="vehiculos.php">🚗 Vehículos</a></li>
         <li><a href="tarifas.php">💲 Tarifas</a></li>
         <li><a href="reportes.php" class="active">📊 Reportes</a></li>
       </ul>
       <div class="sidebar-footer">
         <p><b>Rol actual:</b> Administrador</p>
-        <a href="logout.php" class="logout">🚪 Cerrar sesión</a>
+        <a href="index.php" class="logout">🚪 Cerrar sesión</a>
       </div>
     </aside>
 
@@ -57,7 +103,6 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
           <h1>📊 Reportes</h1>
           <p>Análisis detallado de operaciones</p>
         </div>
-        <!-- Botón exportar PDF -->
         <a href="reportes_pdf.php" class="btn-exportar">📄 Exportar PDF</a>
       </header>
 
@@ -65,23 +110,19 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
       <section class="cards">
         <div class="card">
           <h3>Ingresos Hoy</h3>
-          <p class="number green">$366,000</p>
-          <small>+15% vs ayer</small>
+          <p class="number green">$<?= number_format($ingresosHoy,0,',','.') ?></p>
         </div>
         <div class="card">
           <h3>Vehículos Hoy</h3>
-          <p class="number">122</p>
-          <small>+8% vs ayer</small>
+          <p class="number"><?= $vehiculosHoy ?></p>
         </div>
         <div class="card">
           <h3>Promedio Semanal</h3>
-          <p class="number">$289,714</p>
-          <small>Por día</small>
+          <p class="number">$<?= number_format($promedioSemanal,0,',','.') ?></p>
         </div>
         <div class="card">
           <h3>Ocupación Actual</h3>
-          <p class="number">24/50</p>
-          <small>48% ocupado</small>
+          <p class="number"><?= $ocupacionActual ?>/<?= $capacidad ?></p>
         </div>
       </section>
 
@@ -107,79 +148,53 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
           <h3>Clientes Frecuentes</h3>
           <table class="tabla-reportes">
             <thead>
-              <tr>
-                <th>Placa</th>
-                <th>Visitas</th>
-                <th>Última Visita</th>
-                <th>Total Gastado</th>
-              </tr>
+              <tr><th>Placa</th><th>Visitas</th><th>Última Visita</th><th>Total Gastado</th></tr>
             </thead>
             <tbody>
-              <tr><td>ABC-123</td><td>15</td><td>Hoy</td><td>$45,000</td></tr>
-              <tr><td>DEF-456</td><td>12</td><td>Ayer</td><td>$36,000</td></tr>
-              <tr><td>GHI-789</td><td>10</td><td>Hoy</td><td>$30,000</td></tr>
-              <tr><td>JKL-012</td><td>8</td><td>2 días</td><td>$24,000</td></tr>
-              <tr><td>MNO-345</td><td>7</td><td>Hoy</td><td>$21,000</td></tr>
+              <?php foreach($clientesFrecuentes as $c): ?>
+              <tr>
+                <td><?= htmlspecialchars($c['placa']) ?></td>
+                <td><?= $c['visitas'] ?></td>
+                <td><?= $c['ultima'] ?></td>
+                <td>$<?= number_format($c['gastado'],0,',','.') ?></td>
+              </tr>
+              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
-      </section>
-
-      <!-- Resumen semanal detallado -->
-      <section class="card">
-        <h3>Resumen Semanal Detallado</h3>
-        <table class="tabla-reportes">
-          <thead>
-            <tr>
-              <th>Día</th>
-              <th>Vehículos</th>
-              <th>Ingresos</th>
-              <th>Promedio por Vehículo</th>
-              <th>% del Total Semanal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Lun</td><td>89</td><td>$267,000</td><td>$3,000</td><td>13.2%</td></tr>
-            <tr><td>Mar</td><td>95</td><td>$285,000</td><td>$3,000</td><td>14.1%</td></tr>
-            <tr><td>Mié</td><td>102</td><td>$306,000</td><td>$3,000</td><td>15.1%</td></tr>
-            <tr><td>Jue</td><td>87</td><td>$261,000</td><td>$3,000</td><td>12.9%</td></tr>
-            <tr><td>Vie</td><td>110</td><td>$330,000</td><td>$3,000</td><td>16.3%</td></tr>
-            <tr><td>Sáb</td><td>125</td><td>$375,000</td><td>$3,000</td><td>18.5%</td></tr>
-            <tr><td>Dom</td><td>68</td><td>$204,000</td><td>$3,000</td><td>10.1%</td></tr>
-          </tbody>
-        </table>
       </section>
     </main>
   </div>
 
   <!-- JS de gráficas -->
   <script>
-    // Actividad por hora
+    const actividadHoras = <?= json_encode($actividadHoras) ?>;
+    const ingresosSemanales = <?= json_encode($ingresosSemanales) ?>;
+    const tiposVehiculos = <?= json_encode($tiposVehiculos) ?>;
+
     new Chart(document.getElementById('chartHoras'), {
       type: 'bar',
       data: {
-        labels: ['06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00'],
-        datasets: [{ data: [2,14,10,18,22,20,15,7], backgroundColor:'#2563eb' }]
+        labels: Object.keys(actividadHoras).map(h => h+":00"),
+        datasets: [{ data: Object.values(actividadHoras), backgroundColor:'#2563eb' }]
       },
       options: { responsive:true, plugins:{ legend:{display:false} } }
     });
 
-    // Ingresos semanales
     new Chart(document.getElementById('chartIngresos'), {
       type: 'line',
       data: {
-        labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
-        datasets: [{ data: [267000,285000,306000,261000,330000,375000,204000], borderColor:'#16a34a', tension:0.3 }]
+        labels: Object.keys(ingresosSemanales),
+        datasets: [{ data: Object.values(ingresosSemanales), borderColor:'#16a34a', tension:0.3 }]
       },
       options: { responsive:true, plugins:{ legend:{display:false} } }
     });
 
-    // Distribución de tipos
     new Chart(document.getElementById('chartTipos'), {
       type: 'pie',
       data: {
-        labels: ['Automóviles','Motocicletas','Camiones','Bicicletas'],
-        datasets: [{ data: [65,24,8,3], backgroundColor:['#2563eb','#16a34a','#dc2626','#9333ea'] }]
+        labels: Object.keys(tiposVehiculos),
+        datasets: [{ data: Object.values(tiposVehiculos), backgroundColor:['#2563eb','#16a34a','#dc2626','#9333ea'] }]
       }
     });
   </script>

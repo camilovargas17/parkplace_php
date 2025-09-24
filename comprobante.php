@@ -13,7 +13,7 @@ $c=$_SESSION['comprobante'];
   <p><strong>Tipo:</strong> <?php echo $c['tipo']; ?></p>
   <p><strong>Entrada:</strong> <?php echo $c['entrada']; ?></p>
   <p><strong>Salida:</strong> <?php echo $c['salida']; ?></p>
-  <p><strong>Horas:</strong> <?php echo $c['horas']; ?></p>
+  <p><strong>Tiempo exacto:</strong> <?= $_SESSION['comprobante']['tiempoExacto'] ?></p>
   <p><strong>Total:</strong> $<?php echo $c['total']; ?></p>
   <button onclick="window.print()">Imprimir</button>
   <a href="pdf_generate.php" target="_blank">Descargar PDF</a>

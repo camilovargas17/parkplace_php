@@ -1,7 +1,34 @@
 <?php
 session_start();
-if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
-  header("Location:index.php"); exit;
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
+  header("Location:index.php");
+  exit;
+}
+
+// Conexión a la BD
+$mysqli = new mysqli("localhost", "root", "", "parkplace");
+if ($mysqli->connect_errno) {
+  die("Error de conexión: " . $mysqli->connect_error);
+}
+
+// Vehículos activos (entraron y aún no tienen salida)
+$resActivos = $mysqli->query("SELECT COUNT(*) AS activos FROM registros WHERE hora_salida IS NULL");
+$vehiculosActivos = $resActivos->fetch_assoc()['activos'] ?? 0;
+
+// Ingresos del día
+$resIngresosDia = $mysqli->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = CURDATE()");
+$ingresosDia = $resIngresosDia->fetch_assoc()['ingresos'] ?? 0;
+
+// Total de registros del día
+$resRegistrosHoy = $mysqli->query("SELECT COUNT(*) AS total FROM registros WHERE DATE(created_at) = CURDATE()");
+$totalRegistros = $resRegistrosHoy->fetch_assoc()['total'] ?? 0;
+
+// Ingresos semanales (Lun-Dom)
+$ingresosSemana = [];
+for ($i = 0; $i < 7; $i++) {
+    $dia = date('Y-m-d', strtotime("monday this week +$i day"));
+    $resDia = $mysqli->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = '$dia'");
+    $ingresosSemana[] = $resDia->fetch_assoc()['ingresos'] ?? 0;
 }
 ?>
 <!doctype html>
@@ -23,11 +50,13 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
       <ul class="menu">
         <li><a href="admin_dashboard.php" class="active">🏠 Panel Principal</a></li>
         <li><a href="usuarios.php">👤 Usuarios</a></li>
-        <li> <a href="registro_entrada.php">Registrar Entrada</a></li>
-        <li><a href="registro_salida.php">Registrar Salida</a></li>
+        <li><a href="registro_entrada.php">⬅️Registrar Entrada</a></li>
+        <li><a href="registro_salida.php">➡️Registrar Salida</a></li>
         <li><a href="vehiculos.php">🚗 Vehículos</a></li>
         <li><a href="tarifas.php">💲 Tarifas</a></li>
         <li><a href="reportes.php">📊 Reportes</a></li>
+        <!-- ✅ Nuevo enlace a ESPACIOS -->
+        <li><a href="espacios.php">🅿️ Espacios</a></li>
       </ul>
       <div class="sidebar-footer">
         <p><b>Rol actual:</b> Administrador</p>
@@ -46,18 +75,18 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
       <section class="cards">
         <div class="card">
           <h3>Vehículos Activos</h3>
-          <p class="number">24</p>
-          <small>+3 desde ayer</small>
+          <p class="number"><?= $vehiculosActivos ?></p>
+          <small>Actualmente en el parqueadero</small>
         </div>
         <div class="card">
           <h3>Ingresos del Día</h3>
-          <p class="number green">$185,000</p>
-          <small>+12% vs ayer</small>
+          <p class="number green">$<?= number_format($ingresosDia, 0, ',', '.') ?></p>
+          <small>Acumulado hoy</small>
         </div>
         <div class="card">
           <h3>Total de Registros</h3>
-          <p class="number">89</p>
-          <small>Registros hoy</small>
+          <p class="number"><?= $totalRegistros ?></p>
+          <small>Registros de hoy</small>
         </div>
       </section>
 
@@ -77,7 +106,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol']!=='administrador') {
         labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
         datasets: [{
           label: 'Ingresos',
-          data: [140000, 160000, 180000, 150000, 210000, 280000, 130000],
+          data: <?= json_encode($ingresosSemana) ?>,
           backgroundColor: '#1565c0'
         }]
       },

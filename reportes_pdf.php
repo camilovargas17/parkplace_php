@@ -1,5 +1,6 @@
 <?php
 require 'vendor/autoload.php';
+require 'db.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -8,6 +9,43 @@ $options = new Options();
 $options->set('isRemoteEnabled', true);
 
 $dompdf = new Dompdf($options);
+
+// 📌 CONSULTAS DINÁMICAS (ajustadas a "costo")
+
+// Ingresos de hoy
+$ingresosHoy = $pdo->query("SELECT IFNULL(SUM(costo),0) FROM registros WHERE DATE(hora_salida)=CURDATE()")->fetchColumn();
+
+// Vehículos hoy
+$vehiculosHoy = $pdo->query("SELECT COUNT(*) FROM registros WHERE DATE(hora_entrada)=CURDATE()")->fetchColumn();
+
+// Promedio semanal (últimos 7 días)
+$promedioSemanal = $pdo->query("SELECT IFNULL(AVG(costo),0) FROM registros WHERE YEARWEEK(hora_entrada,1)=YEARWEEK(CURDATE(),1)")->fetchColumn();
+
+// Ocupación actual
+$capacidadMax = 50; // 🔹 cámbialo según tu parqueadero
+$ocupados = $pdo->query("SELECT COUNT(*) FROM registros WHERE hora_salida IS NULL")->fetchColumn();
+
+// Clientes frecuentes
+$clientes = $pdo->query("
+    SELECT v.placa, COUNT(r.id) as visitas, MAX(r.hora_entrada) as ultima_visita, SUM(r.costo) as gastado
+    FROM registros r
+    JOIN vehiculos v ON r.vehiculo_id=v.id
+    GROUP BY v.placa
+    ORDER BY visitas DESC
+    LIMIT 5
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// Resumen semanal detallado
+$resumen = $pdo->query("
+    SELECT DAYNAME(hora_entrada) as dia, COUNT(*) as vehiculos, SUM(costo) as ingresos
+    FROM registros
+    WHERE YEARWEEK(hora_entrada,1)=YEARWEEK(CURDATE(),1)
+    GROUP BY DAYOFWEEK(hora_entrada)
+    ORDER BY DAYOFWEEK(hora_entrada)
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// Totales
+$totales = $pdo->query("SELECT COUNT(*) as vehiculos, SUM(costo) as ingresos FROM registros")->fetch(PDO::FETCH_ASSOC);
 
 ob_start();
 ?>
@@ -62,6 +100,17 @@ ob_start();
   <p>📅 Fecha de emisión: <?= date("d/m/Y H:i"); ?></p>
 </div>
 
+<h3>📌 Resumen General</h3>
+<table>
+  <tr><th>Ingresos Hoy</th><th>Vehículos Hoy</th><th>Promedio Semanal</th><th>Ocupación Actual</th></tr>
+  <tr>
+    <td>$<?= number_format($ingresosHoy,0,",","."); ?></td>
+    <td><?= $vehiculosHoy; ?></td>
+    <td>$<?= number_format($promedioSemanal,0,",","."); ?></td>
+    <td><?= $ocupados ?>/<?= $capacidadMax; ?></td>
+  </tr>
+</table>
+
 <h3>🚗 Clientes Frecuentes</h3>
 <table>
   <thead>
@@ -70,11 +119,14 @@ ob_start();
     </tr>
   </thead>
   <tbody>
-    <tr><td>ABC-123</td><td>15</td><td>Hoy</td><td>$45,000</td></tr>
-    <tr><td>DEF-456</td><td>12</td><td>Ayer</td><td>$36,000</td></tr>
-    <tr><td>GHI-789</td><td>10</td><td>Hoy</td><td>$30,000</td></tr>
-    <tr><td>JKL-012</td><td>8</td><td>2 días</td><td>$24,000</td></tr>
-    <tr><td>MNO-345</td><td>7</td><td>Hoy</td><td>$21,000</td></tr>
+    <?php foreach ($clientes as $c): ?>
+    <tr>
+      <td><?= $c['placa']; ?></td>
+      <td><?= $c['visitas']; ?></td>
+      <td><?= $c['ultima_visita']; ?></td>
+      <td>$<?= number_format($c['gastado'],0,",","."); ?></td>
+    </tr>
+    <?php endforeach; ?>
   </tbody>
 </table>
 
@@ -82,24 +134,28 @@ ob_start();
 <table>
   <thead>
     <tr>
-      <th>Día</th><th>Vehículos</th><th>Ingresos</th><th>Promedio por Vehículo</th><th>% del Total Semanal</th>
+      <th>Día</th><th>Vehículos</th><th>Ingresos</th><th>Promedio por Vehículo</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td>Lun</td><td>89</td><td>$267,000</td><td>$3,000</td><td>13.2%</td></tr>
-    <tr><td>Mar</td><td>95</td><td>$285,000</td><td>$3,000</td><td>14.1%</td></tr>
-    <tr><td>Mié</td><td>102</td><td>$306,000</td><td>$3,000</td><td>15.1%</td></tr>
-    <tr><td>Jue</td><td>87</td><td>$261,000</td><td>$3,000</td><td>12.9%</td></tr>
-    <tr><td>Vie</td><td>110</td><td>$330,000</td><td>$3,000</td><td>16.3%</td></tr>
-    <tr><td>Sáb</td><td>125</td><td>$375,000</td><td>$3,000</td><td>18.5%</td></tr>
-    <tr><td>Dom</td><td>68</td><td>$204,000</td><td>$3,000</td><td>10.1%</td></tr>
+    <?php foreach ($resumen as $r): ?>
+    <tr>
+      <td><?= $r['dia']; ?></td>
+      <td><?= $r['vehiculos']; ?></td>
+      <td>$<?= number_format($r['ingresos'],0,",","."); ?></td>
+      <td>$<?= number_format(($r['ingresos']/$r['vehiculos']),0,",","."); ?></td>
+    </tr>
+    <?php endforeach; ?>
   </tbody>
 </table>
 
 <h3>📌 Totales Generales</h3>
 <table>
-  <tr><th>Total Vehículos</th><th>Total Ingresos</th><th>Promedio Diario</th></tr>
-  <tr><td>676</td><td>$2,028,000</td><td>$289,714</td></tr>
+  <tr><th>Total Vehículos</th><th>Total Ingresos</th></tr>
+  <tr>
+    <td><?= $totales['vehiculos']; ?></td>
+    <td>$<?= number_format($totales['ingresos'],0,",","."); ?></td>
+  </tr>
 </table>
 
 <div class="footer">
@@ -115,7 +171,7 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-// ✅ Numeración de páginas
+// Numeración de páginas
 $canvas = $dompdf->getCanvas();
 $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
     $text = "Página $pageNumber de $pageCount";
