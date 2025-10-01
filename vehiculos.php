@@ -11,8 +11,16 @@ if ($_SESSION['rol'] !== 'administrador') {
 // Dashboard destino según rol
 $dashboard = ($_SESSION['rol'] === 'administrador') ? 'admin_dashboard.php' : 'operador_dashboard.php';
 
-// Obtener vehículos
-$vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fetchAll();
+// Filtro por placa (si existe)
+$placaFiltro = isset($_GET['placa']) ? trim($_GET['placa']) : '';
+
+if ($placaFiltro !== '') {
+  $stmt = $pdo->prepare("SELECT * FROM vehiculos WHERE placa LIKE :placa ORDER BY created_at DESC");
+  $stmt->execute(['placa' => "%$placaFiltro%"]);
+  $vehiculos = $stmt->fetchAll();
+} else {
+  $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fetchAll();
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -21,7 +29,6 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
   <meta charset="utf-8">
   <title>Vehículos registrados</title>
   <link rel="stylesheet" href="styles-vehiculos.css">
-  <!-- FontAwesome para iconos -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     body {
@@ -36,6 +43,31 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
 
     h1 {
       margin-bottom: 1.5rem;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button[type="submit"] {
+      padding: 8px 12px;
+      background-color: #4da3ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #3c91e6;
     }
 
     table {
@@ -64,7 +96,6 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
       background: #f0f8ff;
     }
 
-    /* Columna de acciones */
     .acciones {
       text-align: center;
       white-space: nowrap;
@@ -93,7 +124,6 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
       color: #d63031;
     }
 
-    /* Botón volver */
     .volver {
       margin-top: 1.5rem;
       display: inline-block;
@@ -115,6 +145,13 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
 
 <body>
   <h1>Vehículos registrados</h1>
+
+  <!-- Formulario de búsqueda -->
+  <form method="GET">
+    <input type="text" name="placa" placeholder="Buscar por placa" value="<?php echo htmlspecialchars($placaFiltro); ?>">
+    <button type="submit">Buscar</button>
+  </form>
+
   <table>
     <tr>
       <th>Placa</th>
@@ -122,27 +159,31 @@ $vehiculos = $pdo->query("SELECT * FROM vehiculos ORDER BY created_at DESC")->fe
       <th>Fecha Registro</th>
       <th>Acciones</th>
     </tr>
-    <?php foreach ($vehiculos as $v): ?>
+
+    <?php if (empty($vehiculos)): ?>
       <tr>
-        <td><?php echo $v['placa']; ?></td>
-        <td><?php echo $v['tipo']; ?></td>
-        <td><?php echo $v['created_at']; ?></td>
-        <td class="acciones">
-          <!-- Editar -->
-          <a href="editar_vehiculo.php?id=<?php echo $v['id']; ?>" class="edit" title="Editar">
-            <i class="fas fa-pen"></i>
-          </a>
-          <!-- Eliminar -->
-          <a href="eliminar_vehiculo.php?id=<?php echo $v['id']; ?>" class="delete" title="Eliminar"
-             onclick="return confirm('¿Seguro que deseas eliminar este vehículo?');">
-            <i class="fas fa-trash"></i>
-          </a>
-        </td>
+        <td colspan="4" style="text-align: center;">No se encontraron vehículos con esa placa.</td>
       </tr>
-    <?php endforeach; ?>
+    <?php else: ?>
+      <?php foreach ($vehiculos as $v): ?>
+        <tr>
+          <td><?php echo htmlspecialchars($v['placa']); ?></td>
+          <td><?php echo htmlspecialchars($v['tipo']); ?></td>
+          <td><?php echo htmlspecialchars($v['created_at']); ?></td>
+          <td class="acciones">
+            <a href="editar_vehiculo.php?id=<?php echo $v['id']; ?>" class="edit" title="Editar">
+              <i class="fas fa-pen"></i>
+            </a>
+            <a href="eliminar_vehiculo.php?id=<?php echo $v['id']; ?>" class="delete" title="Eliminar"
+               onclick="return confirm('¿Seguro que deseas eliminar este vehículo?');">
+              <i class="fas fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    <?php endif; ?>
   </table>
 
-  <!-- Botón volver dinámico -->
   <a href="<?php echo $dashboard; ?>" class="volver">⬅️ Volver al Dashboard</a>
 </body>
 </html>

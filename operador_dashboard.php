@@ -99,7 +99,7 @@ $ultimos = $pdo->query("
         <p><b>Rol actual:</b> Operador</p>
         <a href="index.php" class="logout">🚪 Cerrar sesión</a>
       </div>
-    </aside>
+    </aside>  
 
     <!-- Contenido -->
     <main class="main-content">

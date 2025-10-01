@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ParkPlace — Gestión Inteligente de Parqueaderos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#06b6d4; --muted:#9aa4b2; --glass: rgba(255,255,255,0.04);
+      --max-w:1100px;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#071024 0%, #071828 100%);color:#e6eef6;line-height:1.5}
+    .container{max-width:var(--max-w);margin:40px auto;padding:24px}
+
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:grid;place-items:center;box-shadow:0 6px 18px rgba(6,182,212,0.12)}
+    .logo svg{width:36px;height:36px}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:0;font-size:14px}
+
+    .hero{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;margin-bottom:32px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));border:1px solid rgba(255,255,255,0.03);padding:22px;border-radius:12px}
+    .hero h2{margin:0 0 8px 0;font-size:22px}
+    .hero p{margin:0;color:var(--muted)}
+
+    .objectives{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px}
+    .objective-item{background:var(--card);padding:16px;border-radius:10px;border:1px solid var(--glass)}
+    .objective-item h3{margin:0 0 8px 0;font-size:16px}
+    .objective-item p{margin:0;color:var(--muted);font-size:14px}
+
+    .specific-list{margin-top:16px}
+    .specific-list ul{margin:0;padding-left:18px;color:var(--muted)}
+    .specific-list li{margin:10px 0}
+
+    aside.features{padding:18px}
+    .feature{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+    .feature svg{flex:0 0 36px}
+    .feature p{margin:0;color:var(--muted);font-size:14px}
+
+    footer{margin-top:36px;padding:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr;}
+      .objectives{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden>
+          <!-- simple car/park icon -->
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13" stroke="white" stroke-opacity="0.95" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM19 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" stroke="white" stroke-opacity="0.95" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div>
+          <h1>ParkPlace</h1>
+          <p class="lead">Solución inteligente para gestión de parqueaderos — entrada, salida, cobro y reportes.</p>
+        </div>
+      </div>
+      <nav aria-label="Enlaces principales">
+        <a href="#objetivo" style="color:var(--accent);text-decoration:none;font-weight:600">Ver objetivos</a>
+      </nav>
+    </header>
+
+    <main class="hero">
+      <section class="card">
+        <h2 id="objetivo">Objetivo General</h2>
+        <p>Más que desarrollar un software, nuestro objetivo general es desarrollar una solución tecnológica y eficiente tanto para los conductores de vehículos y motocicletas, como para la administración de un parqueadero, donde se pueda localizar un espacio disponible y una entrada y salida rápida para que así el tiempo no se convierta en una desventaja, y pueda agilizar procesos como la facturación y el control de ingresos.</p>
+
+        <div class="specific-list">
+          <h3 style="margin-top:18px">Objetivos Específicos</h3>
+          <ul>
+            <li>Administración de perfiles de usuarios.</li>
+            <li>Organización de vehículos y asignación de espacios.</li>
+            <li>Procesamiento de pagos y emisión de facturas.</li>
+            <li>Creación de reportes detallados y análisis estadístico.</li>
+          </ul>
+        </div>
+      </section>
+
+      <aside class="card features" aria-label="Características destacadas">
+        <h3 style="margin-top:0">Beneficios clave</h3>
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="white" stroke-opacity="0.9" stroke-width="1.2"/></svg>
+          <p>Localización rápida de espacios disponibles para reducir tiempo de búsqueda y congestión.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="12" rx="2" stroke="white" stroke-opacity="0.9" stroke-width="1.2"/></svg>
+          <p>Control administrativo intuitivo para gestionar tarifas, usuarios y permisos.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h18" stroke="white" stroke-opacity="0.9" stroke-width="1.2"/></svg>
+          <p>Reportes y métricas para tomar decisiones basadas en datos y optimizar la operación.</p>
+        </div>
+
+        <div style="margin-top:12px">
+          <a href="index.php    " style="display:inline-block;padding:10px 14px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#7c3aed);color:#042027;text-decoration:none;font-weight:700">Login</a>
+        </div>
+      </aside>
+    </main>
+
+    <section class="container card" style="margin-top:0">
+      <h2 style="margin:0 0 12px 0">Cómo funciona (resumen)</h2>
+      <p style="margin:0;color:var(--muted)">ParkPlace integra un registro ágil de entradas y salidas, gestión de parqueaderos por espacios, módulos de facturación y generación de reportes. Soporta perfiles de administrador, operador y cliente, y permite la conexión con dispositivos de lectura (código QR, placa o tarjetas) para automatizar la apertura y facturación.</p>
+
+      <div class="objectives" style="margin-top:18px">
+        <div class="objective-item">
+          <h3>Perfil de usuarios</h3>
+          <p>Gestión de roles y permisos: administrador, operador y cliente; control de accesos y trazabilidad de acciones.</p>
+        </div>
+        <div class="objective-item">
+          <h3>Asignación de espacios</h3>
+          <p>Sistema de reserva y asignación automática de espacios por tipo (carro, moto) y prioridad.</p>
+        </div>
+        <div class="objective-item">
+          <h3>Pagos y facturación</h3>
+          <p>Múltiples opciones de pago (efectivo, POS, pasarela) y emisión de factura electrónica o recibo.</p>
+        </div>
+        <div class="objective-item">
+          <h3>Reportes y análisis</h3>
+          <p>Reportes diarios, históricos y métricas para análisis de ocupación, ingresos y tiempos promedio.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>ParkPlace • Sistema de gestión de parqueaderos — Diseño de ejemplo para documentación del proyecto.</p>
+    </footer>
+  </div>
+</body>
+</html>

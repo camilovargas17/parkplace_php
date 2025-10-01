@@ -10,7 +10,7 @@ $options->set('isRemoteEnabled', true);
 
 $dompdf = new Dompdf($options);
 
-// 📌 CONSULTAS DINÁMICAS (ajustadas a "costo")
+// Consultas dinamicas
 
 // Ingresos de hoy
 $ingresosHoy = $pdo->query("SELECT IFNULL(SUM(costo),0) FROM registros WHERE DATE(hora_salida)=CURDATE()")->fetchColumn();

@@ -69,7 +69,7 @@ $libres = $total - $ocupados;
       </ul>
       <div class="sidebar-footer">
         <p><b>Rol actual:</b> Administrador</p>
-        <a href="logout.php" class="logout">🚪 Cerrar sesión</a>
+        <a href="index.php" class="logout">🚪 Cerrar sesión</a>
       </div>
     </aside>
 

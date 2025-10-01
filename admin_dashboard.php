@@ -5,30 +5,27 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
   exit;
 }
 
-// Conexión a la BD
-$mysqli = new mysqli("localhost", "root", "", "parkplace");
-if ($mysqli->connect_errno) {
-  die("Error de conexión: " . $mysqli->connect_error);
-}
+// Conexión centralizada con PDO
+require_once "db.php";
 
 // Vehículos activos (entraron y aún no tienen salida)
-$resActivos = $mysqli->query("SELECT COUNT(*) AS activos FROM registros WHERE hora_salida IS NULL");
-$vehiculosActivos = $resActivos->fetch_assoc()['activos'] ?? 0;
+$stmt = $pdo->query("SELECT COUNT(*) AS activos FROM registros WHERE hora_salida IS NULL");
+$vehiculosActivos = $stmt->fetch(PDO::FETCH_ASSOC)['activos'] ?? 0;
 
 // Ingresos del día
-$resIngresosDia = $mysqli->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = CURDATE()");
-$ingresosDia = $resIngresosDia->fetch_assoc()['ingresos'] ?? 0;
+$stmt = $pdo->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = CURDATE()");
+$ingresosDia = $stmt->fetch(PDO::FETCH_ASSOC)['ingresos'] ?? 0;
 
-// Total de registros del día
-$resRegistrosHoy = $mysqli->query("SELECT COUNT(*) AS total FROM registros WHERE DATE(created_at) = CURDATE()");
-$totalRegistros = $resRegistrosHoy->fetch_assoc()['total'] ?? 0;
+// Total registros del día
+$stmt = $pdo->query("SELECT COUNT(*) AS total FROM registros WHERE DATE(created_at) = CURDATE()");
+$totalRegistros = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
 // Ingresos semanales (Lun-Dom)
 $ingresosSemana = [];
 for ($i = 0; $i < 7; $i++) {
     $dia = date('Y-m-d', strtotime("monday this week +$i day"));
-    $resDia = $mysqli->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = '$dia'");
-    $ingresosSemana[] = $resDia->fetch_assoc()['ingresos'] ?? 0;
+    $stmt = $pdo->query("SELECT SUM(costo) AS ingresos FROM registros WHERE DATE(created_at) = '$dia'");
+    $ingresosSemana[] = $stmt->fetch(PDO::FETCH_ASSOC)['ingresos'] ?? 0;
 }
 ?>
 <!doctype html>
@@ -55,7 +52,6 @@ for ($i = 0; $i < 7; $i++) {
         <li><a href="vehiculos.php">🚗 Vehículos</a></li>
         <li><a href="tarifas.php">💲 Tarifas</a></li>
         <li><a href="reportes.php">📊 Reportes</a></li>
-        <!-- ✅ Nuevo enlace a ESPACIOS -->
         <li><a href="espacios.php">🅿️ Espacios</a></li>
       </ul>
       <div class="sidebar-footer">

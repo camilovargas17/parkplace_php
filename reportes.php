@@ -29,7 +29,7 @@ $promedioSemanal = $stmt->fetchColumn();
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM registros WHERE hora_salida IS NULL");
 $stmt->execute();
 $ocupacionActual = $stmt->fetchColumn();
-$capacidad = 50; // ⚡ Ajusta según tu parqueadero
+$capacidad = 50;
 
 // Actividad por hora (hoy)
 $stmt = $pdo->prepare("SELECT HOUR(hora_entrada) as hora, COUNT(*) as total FROM registros WHERE DATE(hora_entrada) = CURDATE() GROUP BY HOUR(hora_entrada)");
